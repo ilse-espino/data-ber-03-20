@@ -1,0 +1,103 @@
+    
+-- Challenge 1 - Who Have Published What At Where?
+SELECT
+	authors.au_id 		AS AUTHOR_ID,
+    authors.au_lname 	AS LAST_NAME,
+    authors.au_fname	AS FIRST_NAME,
+	titles.title 		AS TITLE,
+    publishers.pub_name AS PUBLISHER
+FROM publications.authors
+-- adding table_id by au_id from tables titleauthor and authors
+INNER JOIN publications.titleauthor ON authors.au_id=titleauthor.au_id
+-- adding titles by title_id from tables titleauthor and titles
+INNER JOIN publications.titles ON titleauthor.title_id=titles.title_id
+-- adding publisher by pub_id from tables titles and publishers
+INNER JOIN publications.publishers ON titles.pub_id=publishers.pub_id
+ORDER BY AUTHOR_ID, PUBLISHER DESC;
+
+-- Example of join
+SELECT
+	titleauthor.title_id,
+    titles.title AS TITLE
+FROM publications.titles
+INNER JOIN publications.titleauthor
+ON titleauthor.title_id=titles.title_id;
+
+SELECT
+	count(*)
+FROM publications.titleauthor;
+
+-- Challenge 2 - Who Have Published How Many At Where?
+
+SELECT
+	authors.au_id 		AS AUTHOR_ID,
+    authors.au_lname 	AS LAST_NAME,
+    authors.au_fname	AS FIRST_NAME,
+    publishers.pub_name AS PUBLISHER,
+    COUNT(*) 			AS TITLE_COUNT
+FROM publications.authors
+-- adding table_id by au_id from tables titleauthor and authors
+INNER JOIN publications.titleauthor ON authors.au_id=titleauthor.au_id
+-- adding titles by title_id from tables titleauthor and titles
+INNER JOIN publications.titles ON titleauthor.title_id=titles.title_id
+-- adding publisher by pub_id from tables titles and publishers
+INNER JOIN publications.publishers ON titles.pub_id=publishers.pub_id
+GROUP BY AUTHOR_ID, PUBLISHER
+ORDER BY TITLE_COUNT DESC, AUTHOR_ID DESC;
+
+SELECT COUNT(*) FROM publications.titleauthor;
+
+-- Challenge 3 - Best Selling Authors
+SELECT
+	authors.au_id 		AS AUTHOR_ID,
+    authors.au_lname 	AS LAST_NAME,
+    authors.au_fname	AS FIRST_NAME,
+    sum(sales.qty)		AS TOTAL
+FROM publications.authors
+INNER JOIN publications.titleauthor ON authors.au_id=titleauthor.au_id
+INNER JOIN publications.sales ON titleauthor.title_id=sales.title_id
+GROUP BY AUTHOR_ID
+ORDER BY TOTAL DESC
+LIMIT 3;
+
+SELECT *
+FROM publications.titles;
+
+SELECT *
+FROM publications.sales;
+
+-- Challenge 4 - Best Selling Authors Ranking
+SELECT
+	authors.au_id 		AS AUTHOR_ID,
+    authors.au_lname 	AS LAST_NAME,
+    authors.au_fname	AS FIRST_NAME,
+    IFNULL(sum(sales.qty),0) 		AS TOTAL
+FROM publications.authors
+-- using left join to add all the title_id
+LEFT JOIN publications.titleauthor ON authors.au_id=titleauthor.au_id
+LEFT JOIN publications.sales ON titleauthor.title_id=sales.title_id
+GROUP BY AUTHOR_ID
+ORDER BY TOTAL DESC;
+
+-- Bonus Challenge - Most Profiting Authors
+SELECT *
+FROM publications.titles;
+
+SELECT *
+FROM publications.titleauthor;
+
+SELECT *
+FROM publications.roysched;
+
+SELECT
+	authors.au_id 																	AS AUTHOR_ID,
+    authors.au_lname 																AS LAST_NAME,
+    authors.au_fname																AS FIRST_NAME,
+    sum(titles.advance + titles.price*titles.ytd_sales*titles.royalty/100*titleauthor.royaltyper/100)			AS PROFIT
+FROM publications.authors
+-- using left join to add all the title_id
+LEFT JOIN publications.titleauthor ON authors.au_id=titleauthor.au_id
+LEFT JOIN publications.titles ON titleauthor.title_id=titles.title_id
+GROUP BY AUTHOR_ID
+ORDER BY PROFIT DESC
+LIMIT 3;

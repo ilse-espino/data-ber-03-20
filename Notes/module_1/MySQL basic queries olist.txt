@@ -1,0 +1,120 @@
+/*
+-- Selecting a sample
+Clauses:
+-SELECT
+-FROM
+-LIMIT
+*/
+/*
+-- All of these are the same
+SELECT * 
+FROM olist.customers;
+SELECT * FROM olist.customers;
+seLecT * fRoM olist.customers;
+*/
+SELECT * 
+FROM olist.customers
+LIMIT 100;
+
+-- Selecting columns
+SELECT 
+	customer_id, 
+	customer_zip_code_prefix,
+    customer_state
+FROM olist.customers
+LIMIT 100;
+
+-- Sorting
+SELECT *
+FROM olist.orders
+ORDER BY order_purchase_timestamp -- Ascending order  (default)
+LIMIT 1000;
+
+SELECT 
+	order_id,
+    customer_id,
+    order_status,
+    order_purchase_timestamp
+FROM olist.orders
+ORDER BY order_purchase_timestamp DESC -- Descending order
+LIMIT 1000;
+
+SELECT 
+	order_id 		AS order_identifier,
+    customer_id 	AS customer_identifier,
+    order_status 	AS order_status_string
+FROM olist.orders
+ORDER BY order_purchase_timestamp DESC
+LIMIT 1000;
+
+-- Selecting rows
+-- Select orders placed in Feb 2018
+SELECT *
+FROM olist.orders
+WHERE order_purchase_timestamp >= '2018-02-01'
+	AND order_purchase_timestamp < '2018-03-01'
+LIMIT 1000;
+
+SELECT *
+FROM olist.customers
+WHERE customer_state = 'BA'
+LIMIT 1000;
+
+SELECT *
+FROM olist.customers
+WHERE customer_state = 'BA'
+	AND customer_city = 'salvador'
+    AND customer_id LIKE 'a%'
+LIMIT 1000;
+
+SELECT *
+FROM olist.customers
+WHERE (customer_state = 'BA'
+	OR customer_state ='GO')
+    AND customer_id LIKE 'a%'
+LIMIT 1000;
+
+SELECT *
+FROM olist.customers
+WHERE customer_state IN ('BA', 'GO')
+    AND customer_id LIKE 'a%'
+LIMIT 1000;
+
+-- Column transformations
+
+-- Add a new column that states in which price category a product is
+SELECT 
+	order_id,
+    product_id,
+    price,
+    IF (price < 100,  'cheap', 'expensive') AS price_category
+FROM olist.order_items
+LIMIT 1000;
+
+SELECT 
+	order_id,
+    product_id,
+    price,
+    IF (price < 100,  'cheap', IF (price < 350, 'medium', 'expensive')) AS price_category
+FROM olist.order_items
+LIMIT 1000;
+
+SELECT 
+	order_id,
+    product_id,
+    price,
+    CASE
+		WHEN price < 100 THEN 'cheap'
+        WHEN price < 350 THEN 'medium'
+        ELSE 'expensive'
+	END									AS price_category
+FROM olist.order_items
+LIMIT 1000;
+
+SELECT
+	order_id,
+	product_id
+    price,
+    freight_value,
+    price + freight_value AS total_volume
+FROM olist.order_items;
